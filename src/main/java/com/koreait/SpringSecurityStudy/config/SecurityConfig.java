@@ -1,11 +1,15 @@
 package com.koreait.SpringSecurityStudy.config;
 
+import com.koreait.SpringSecurityStudy.security.filter.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -13,13 +17,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    //비밀번호를 안전하게 암호화(해싱)하고, 검증하는 역할
+    //단방향 해시, 복호화 불가능
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     //corsConfigurationSource() 설정은 spring security에서
     //CORS(Cross-Origin Resource Sharing)를 처리하기 위한 설정
     //CORS
     //브라우저가 보안상 다른 도메인의 리소스 요청을 제한하는 정책
     //기본적으로 브라우저는 같은 출처(Same-Origin)만 허용한다.
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         // 요청을 보내는 쪽의 도메인(사이트 주소)을 허용하겠다
         corsConfiguration.addAllowedOriginPattern(CorsConfiguration.ALL);
@@ -52,11 +66,17 @@ public class SecurityConfig {
         http.logout(logout -> logout.disable());
         http.sessionManagement(Session -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         // 특정 요청 URL에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
-        //    auth.requestMatchers("").permitAll();
+            auth.requestMatchers("/auth/test").hasRole("ADMIN");
+            //권한을 ROLE_ADMIN, ROLE_USER 처럼 저장했다면 -> hasRole("ADMIN") 가능
+            //권한을 그냥 ADMIN, USER 이렇게 저장했다면 -> hasAuthority("ADMIN") 사용
+            auth.requestMatchers("/auth/signup","/auth/signin").permitAll();
             auth.anyRequest().authenticated();
         });
+
         return http.build();
-        }
     }
+}
