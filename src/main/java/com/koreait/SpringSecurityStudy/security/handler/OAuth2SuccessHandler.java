@@ -42,7 +42,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oAuth2User = oauth2UserRepository.getOAuth2UserByProviderAndProviderUserId(provider, providerUserId);
 
         if (oAuth2User == null){
-            response.sendRedirect("http://localhost:3000/auth/oauth/oauth2?provider=" + provider + "&providerUserId" + "&email=" + email);
+            response.sendRedirect("http://localhost:3000/auth/oauth/oauth2?provider=" + provider + "&providerUserId=" + providerUserId + "&email=" + email);
+            return;
         }
         //연동된 사용자가 있다면? => userId를 통해 회원 정보 조회
         Optional<User> optionalUser = userRepository.getUserByUserId(oAuth2User.getUserId());

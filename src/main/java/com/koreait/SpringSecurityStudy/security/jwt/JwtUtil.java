@@ -30,6 +30,15 @@ public class JwtUtil {
                 .compact();//설정한 JWT 내용을 바탕으로 최종적으로 문자열 형태의 JWT생성
     }
 
+    public String generateMailVerifyToken(String id){
+        return Jwts.builder()
+                .subject("VerifyToken")
+                .id(id)
+                .expiration(new Date(new Date().getTime() + (1000L * 60L * 3L)))
+                .signWith(KEY)
+                .compact();
+    }
+
     public boolean isBearer(String token) {
         if (token == null) {
             return false;
