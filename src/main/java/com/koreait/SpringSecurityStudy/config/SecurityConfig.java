@@ -81,11 +81,8 @@ public class SecurityConfig {
             auth.requestMatchers("/auth/test").hasRole("ADMIN");
             //권한을 ROLE_ADMIN, ROLE_USER 처럼 저장했다면 -> hasRole("ADMIN") 가능
             //권한을 그냥 ADMIN, USER 이렇게 저장했다면 -> hasAuthority("ADMIN") 사용
-            auth.requestMatchers("/auth/signup",
-                    "/auth/signin",
-                    "/oauth2/**",
-                    "/login/oauth2/**"
-            ).permitAll();
+            auth.requestMatchers("/auth/signup", "/auth/signin", "/oauth2/**",
+                    "/login/oauth2/**","/mail/verify").permitAll();
             auth.anyRequest().authenticated();
         });
 
